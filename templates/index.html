@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Service Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #111827;
+            color: #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            width: 900px;
+            flex-grow: 1;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 40px;
+        }
+
+        .input-panel {
+            width: 350px;
+            background: #1f2937;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #374151;
+        }
+
+        h1 {
+            font-size: 18px;
+            color: #60a5fa;
+            text-transform: uppercase;
+            margin-top: 0;
+            border-bottom: 1px solid #374151;
+            padding-bottom: 15px;
+        }
+
+        label {
+            font-size: 12px;
+            color: #9ca3af;
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #111827;
+            border: 1px solid #374151;
+            color: white;
+            border-radius: 6px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-top: 25px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .report-panel {
+            flex-grow: 1;
+            display: none;
+            width: 450px;
+        }
+
+        .report-panel.active {
+            display: block;
+        }
+
+        .health-header {
+            background: #1f2937;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-box {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #111827;
+            background: white;
+            display: inline-block;
+        }
+
+        .advice-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1f2937;
+            border-radius: 12px;
+            border-left: 5px solid #60a5fa;
+        }
+
+        .advice-title {
+            font-size: 12px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .advice-text {
+            font-size: 16px;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .issue-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .issue-card {
+            background: #374151;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #4b5563;
+        }
+
+        .part-name {
+            color: #f87171;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .action-text {
+            color: #d1d5db;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .cost-tag {
+            background: #111827;
+            color: #60a5fa;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            float: right;
+            margin-top: -20px;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            padding: 20px;
+            border-top: 1px solid #374151;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        footer a {
+            color: #9ca3af;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #60a5fa;
+        }
+
+        footer i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="input-panel">
+            <h1>🔧 Mechanic Console</h1>
+            <form action="/predict" method="POST">
+
+                <label>Bike Model</label>
+                <select name="bike_model">
+                    {% for bike in bike_options %}
+                    <option value="{{ bike }}">{{ bike }}</option>
+                    {% endfor %}
+                </select>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Engine Temp (°C)</label>
+                        <input type="number" name="temp" step="0.1" placeholder="Normal: 85-105" required>
+                    </div>
+                    <div>
+                        <label>Battery (Volts)</label>
+                        <input type="number" step="0.1" name="voltage" placeholder="Normal: >12.6" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Chain Slack (mm)</label>
+                        <input type="number" name="chain" placeholder="Normal: 25-35" required>
+                    </div>
+                    <div>
+                        <label>Vibration (1-10)</label>
+                        <input type="number" name="vibe" placeholder="Normal: 1-3" required>
+                    </div>
+                </div>
+
+                <label>Idle RPM</label>
+                <input type="number" name="rpm" placeholder="Normal: 1000-1400" required>
+
+                <hr style="border: 0; border-top: 1px solid #374151; margin: 20px 0;">
+
+                <label>Customer Work Exp (Years)</label>
+                <input type="number" step="0.1" name="work_exp" placeholder="e.g. 2.5" required>
+
+                <button type="submit">GENERATE REPORT</button>
+            </form>
+        </div>
+
+        {% if report %}
+        <div class="report-panel active">
+
+            <div class="health-header" style="border-bottom: 4px solid {{ report.color }};">
+                <div>
+                    <div style="color: #9ca3af; font-size: 12px; margin-bottom: 5px;">VEHICLE HEALTH SCORE</div>
+                    <div class="score-box" style="color: {{ report.color }};">{{ report.score }}%</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="status-badge" style="background: {{ report.color }};">{{ report.status }}</div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #9ca3af;">{{ bike }}</div>
+                </div>
+            </div>
+
+            <div class="advice-box" style="border-left-color: {{ report.color }};">
+                <div class="advice-title">AI Strategic Recommendation</div>
+                <div class="advice-text">{{ report.advice }}</div>
+                {% if report.est_cost > 0 %}
+                <div style="margin-top: 10px; font-size: 12px; color: #60a5fa;">
+                    Financial Impact: {{ impact }}% of Est. Income
+                </div>
+                {% endif %}
+            </div>
+
+            {% if report.issues %}
+            <h3 style="margin-top: 25px; font-size: 14px; color: #9ca3af; text-transform: uppercase;">Required Actions
+            </h3>
+            <div class="issue-grid">
+                {% for issue in report.issues %}
+                <div class="issue-card">
+                    <span class="cost-tag">${{ issue.cost }}</span>
+                    <div class="part-name">{{ issue.part }}</div>
+                    <div class="action-text">{{ issue.action }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+    </div>
+
+    <footer>
+        <p>Built by <strong>ATHARV SHARMA</strong></p>
+        <div>
+            <a href="mailto:atharvsharma6969@gmail.com" target="_blank"><i class="fas fa-envelope"></i> Contact Me</a>
+            <a href="www.linkedin.com/in/atharv-sharma-066b0736b/" target="_blank"><i class="fab fa-linkedin"></i>
+                LinkedIn</a>
+            <a href="https://github.com/AtharvBeDiff" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+        </div>
+        <p style="margin-top: 10px; opacity: 0.5; font-size: 12px;">&copy; 2025 AI Service Advisor. All Rights Reserved.
+        </p>
+    </footer>
+
+</body>
+
+</html>
